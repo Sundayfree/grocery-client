@@ -1,0 +1,14 @@
+.footer {
+    height: 2em;
+    background-color: #545754;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .author {
+        font-size: 16px;
+        color: #fff;
+        font-family: Segoe UI;
+    }
+
+}

@@ -1,0 +1,74 @@
+.container {
+  display: flex;
+
+  .lAside {
+    flex: 1;
+
+    .header {
+      height: 7em;
+      background-color: #545754;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      background-color: #393b39;
+      border-radius: 0%;
+      height: 43em;
+      margin-top: -1em;
+
+      .item {
+        height: 5em;
+        color: #fff;
+        border-bottom: 1px solid #9b9e9b;
+        border-radius: 0%;
+        font-family: Segoe UI;
+        font-size: 20px;
+        justify-content: flex-start;
+      }
+    }
+  }
+
+  .rAside {
+    flex: 4;
+
+    .nav {
+      height: 6.1em;
+      background-color: #fff;
+      flex-direction: row;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+
+      .img {
+        height: 3.3em;
+        width: 3.3em;
+      }
+
+      .span {
+        padding-right: 4em;
+        font-size: 1.3em;
+        font-family: Segoe UI;
+      }
+    }
+
+    .content {
+      background-color: #eee;
+      height: 42.9em;
+
+      display: flex;
+
+      .box {
+        flex: 1;
+        display: flex;
+
+        .table {
+          margin-top: 5em;
+          margin-left: 3em;
+          width: 75em;
+        }
+      }
+    }
+  }
+}

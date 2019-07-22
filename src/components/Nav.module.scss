@@ -1,0 +1,29 @@
+.nav {
+    height: 6.1em;
+    background-color: #fff;
+    flex-direction: row;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    box-shadow: 1px 1px #eee;
+
+    .img {
+        height: 3.3em;
+        width: 3.3em;
+    }
+
+    .title {
+        display: flex;
+        align-items: center;
+
+        .span {
+            padding-right: 2em;
+            font-size: 1.3em;
+            font-family: Segoe UI;
+
+        }
+
+
+    }
+
+}
