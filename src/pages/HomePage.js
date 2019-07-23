@@ -34,7 +34,7 @@ class HomePage extends Component {
             />
           </aside>
           <div className={HomeStyle.rAside}>
-            <NavCompo />
+            <NavCompo history={this.props.history} />
             <div className={HomeStyle.content}>
               {this.state.linkTo ? (
                 <TableCompo

@@ -22,7 +22,7 @@ class LoginForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
+      userName: '',
       password: '',
       rePassword: '',
       email: '',
@@ -30,11 +30,12 @@ class LoginForm extends Component {
       msg: '',
       address: '',
       type: '',
-      FirstName: '',
+      firstName: '',
       lastName: '',
       text: '',
       show: false,
-      showModal: false
+      showModal: false,
+      onDimmer: false
     };
     this.handleChange = this.handleChange.bind(this);
     this.loginHandler = this.loginHandler.bind(this);
@@ -51,12 +52,14 @@ class LoginForm extends Component {
   handleChange(e) {
     const { name, value } = e.target;
     if (value === undefined) {
-      let type = e.target.children[0].innerText;
+      console.log(e.target.children[0]);
+      this.setState({ type: e.target.children[0].innerText });
     }
     this.setState({
       [name]: value
     });
   }
+
   async loginHandler() {
     if (this.state.password === '' || this.state.email === '') {
       this.setState({
@@ -81,14 +84,16 @@ class LoginForm extends Component {
       });
     }
   }
+
   async registerHandler() {
+    console.log(this.state);
     if (
-      this.state.username === '' ||
+      this.state.userName === '' ||
       this.state.password === '' ||
       this.state.rePassword === '' ||
       this.state.email === '' ||
       this.state.address === '' ||
-      this.state.FirstName === '' ||
+      this.state.firstName === '' ||
       this.state.lastName === '' ||
       this.state.type === ''
     ) {
@@ -96,21 +101,31 @@ class LoginForm extends Component {
         show: true,
         msg: 'All the fields required..'
       });
+      setTimeout(() => {
+        this.setState({
+          show: false
+        });
+      }, 2000);
       return;
     }
-    if (this.state.password === this.state.rePassword) {
+    if (this.state.password !== this.state.rePassword) {
       this.setState({
         show: true,
         msg: 'Passwords Not Matched..'
       });
+      setTimeout(() => {
+        this.setState({
+          show: false
+        });
+      }, 2000);
       return;
     }
     const payload = {
-      username: this.state.username,
+      userName: this.state.userName,
       password: this.state.password,
       email: this.state.email,
       address: this.state.address,
-      FirstName: this.state.FirstName,
+      firstName: this.state.firstName,
       lastName: this.state.lastName,
       type: this.state.type === 'Admin' ? 0 : 1
     };
@@ -126,13 +141,6 @@ class LoginForm extends Component {
         msg: res.msg
       });
     }
-  }
-  componentDidUpdate() {
-    setTimeout(() => {
-      this.setState({
-        show: false
-      });
-    }, 3000);
   }
 
   render() {
@@ -186,19 +194,24 @@ class LoginForm extends Component {
             </Form>
             <Message>
               New to us?{'    '}
+              <Button
+                basic
+                color="black"
+                circular
+                onClick={() =>
+                  this.setState({
+                    showModal: true,
+                    onDimmer: true
+                  })
+                }
+              >
+                Sign Up
+              </Button>
               <Modal
                 open={this.state.showModal}
-                trigger={
-                  <Button
-                    basic
-                    color="black"
-                    circular
-                    onClick={() => this.setState({ showModal: true })}
-                  >
-                    Sign Up
-                  </Button>
-                }
+                closeOnDimmerClick={this.state.onDimmer}
                 size="small"
+                onClose={this.close}
               >
                 <Modal.Content>
                   <Form>
@@ -255,7 +268,7 @@ class LoginForm extends Component {
                       <Form.Field
                         id="form-input-control-first-name"
                         control={Input}
-                        name="FirstName"
+                        name="firstName"
                         label="First name"
                         placeholder="First name"
                         onChange={this.handleChange}
@@ -275,7 +288,6 @@ class LoginForm extends Component {
                           children: 'Type'
                         }}
                         placeholder="Type"
-                        name="type"
                         search
                         onChange={this.handleChange}
                       />
