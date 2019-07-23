@@ -7,7 +7,7 @@ class TableCompo extends Component {
     console.log(this.props.IsAdmin);
     return (
       <div className={this.props.box}>
-        <Icon
+        {/* <Icon
           name="plus"
           style={{
             fontSize: '1.2em',
@@ -15,7 +15,7 @@ class TableCompo extends Component {
             left: '19.8em',
             top: '8em'
           }}
-        />
+        /> */}
         <Table celled className={this.props.table}>
           <Header>
             <Row>

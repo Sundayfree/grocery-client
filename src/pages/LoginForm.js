@@ -11,7 +11,7 @@ import {
   Select,
   Confirm
 } from 'semantic-ui-react';
-import LoginStyle from './Login.module.scss';
+
 import { post } from '../API/API';
 
 const genderOptions = [
@@ -33,7 +33,8 @@ class LoginForm extends Component {
       FirstName: '',
       lastName: '',
       text: '',
-      show: false
+      show: false,
+      showModal: false
     };
     this.handleChange = this.handleChange.bind(this);
     this.loginHandler = this.loginHandler.bind(this);
@@ -42,15 +43,15 @@ class LoginForm extends Component {
   }
   close() {
     this.setState({
-      open: false
+      open: false,
+      showModal: false
     });
   }
 
   handleChange(e) {
-    let type = null;
     const { name, value } = e.target;
     if (value === undefined) {
-      type = e.target.children[0].innerText;
+      let type = e.target.children[0].innerText;
     }
     this.setState({
       [name]: value
@@ -81,29 +82,29 @@ class LoginForm extends Component {
     }
   }
   async registerHandler() {
-    // if (
-    //   this.state.username === '' ||
-    //   this.state.password === '' ||
-    //   this.state.rePassword === '' ||
-    //   this.state.email === '' ||
-    //   this.state.address === '' ||
-    //   this.state.FirstName === '' ||
-    //   this.state.lastName === '' ||
-    //   this.state.type === ''
-    // ) {
-    //   this.setState({
-    //     show: true,
-    //     msg: 'All the fields required..'
-    //   });
-    //   return;
-    // }
-    // if (this.state.password === this.state.rePassword) {
-    //   this.setState({
-    //     show: true,
-    //     msg: 'Passwords Not Matched..'
-    //   });
-    //   return;
-    // }
+    if (
+      this.state.username === '' ||
+      this.state.password === '' ||
+      this.state.rePassword === '' ||
+      this.state.email === '' ||
+      this.state.address === '' ||
+      this.state.FirstName === '' ||
+      this.state.lastName === '' ||
+      this.state.type === ''
+    ) {
+      this.setState({
+        show: true,
+        msg: 'All the fields required..'
+      });
+      return;
+    }
+    if (this.state.password === this.state.rePassword) {
+      this.setState({
+        show: true,
+        msg: 'Passwords Not Matched..'
+      });
+      return;
+    }
     const payload = {
       username: this.state.username,
       password: this.state.password,
@@ -114,7 +115,17 @@ class LoginForm extends Component {
       type: this.state.type === 'Admin' ? 0 : 1
     };
     const res = await post('/api/register', payload);
-    console.log(res);
+    if (res.code === 0) {
+      this.setState({
+        open: true,
+        msg: res.msg
+      });
+    } else {
+      this.setState({
+        open: true,
+        msg: res.msg
+      });
+    }
   }
   componentDidUpdate() {
     setTimeout(() => {
@@ -176,14 +187,20 @@ class LoginForm extends Component {
             <Message>
               New to us?{'    '}
               <Modal
+                open={this.state.showModal}
                 trigger={
-                  <Button basic color="black" circular>
+                  <Button
+                    basic
+                    color="black"
+                    circular
+                    onClick={() => this.setState({ showModal: true })}
+                  >
                     Sign Up
                   </Button>
                 }
                 size="small"
               >
-                <Modal.Content className={LoginStyle.container}>
+                <Modal.Content>
                   <Form>
                     {this.state.show ? (
                       <p
@@ -272,13 +289,6 @@ class LoginForm extends Component {
                       circular
                       style={{ marginLeft: '12.5em', width: '17em' }}
                       onClick={this.registerHandler}
-                    />
-                    <Confirm
-                      open={this.state.open}
-                      onCancel={() => this.setState({ open: false })}
-                      onConfirm={this.close}
-                      content={this.state.msg}
-                      style={{ width: '20em' }}
                     />
                   </Form>
                 </Modal.Content>
