@@ -42,6 +42,7 @@ class LoginForm extends Component {
     this.close = this.close.bind(this);
     this.registerHandler = this.registerHandler.bind(this);
   }
+
   close() {
     this.setState({
       open: false,
@@ -52,7 +53,6 @@ class LoginForm extends Component {
   handleChange(e) {
     const { name, value } = e.target;
     if (value === undefined) {
-      console.log(e.target.children[0]);
       this.setState({ type: e.target.children[0].innerText });
     }
     this.setState({
@@ -76,7 +76,7 @@ class LoginForm extends Component {
     const res = await post('/api/login', payload);
 
     if (res.code === 0) {
-      this.props.history.push('/dashboard');
+      this.props.history.push('/dashboard', this.state);
     } else {
       this.setState({
         open: true,
@@ -86,7 +86,6 @@ class LoginForm extends Component {
   }
 
   async registerHandler() {
-    console.log(this.state);
     if (
       this.state.userName === '' ||
       this.state.password === '' ||

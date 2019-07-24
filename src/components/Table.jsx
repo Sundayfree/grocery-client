@@ -1,31 +1,100 @@
 import React, { Component } from 'react';
+
 import {
   Table,
   Button,
   Icon,
-  Message,
-  Segment,
   Modal,
   Input,
-  Select,
-  Confirm,
-  Form
+  Form,
+  Loader,
+  Confirm
 } from 'semantic-ui-react';
+import { DateInput } from 'semantic-ui-calendar-react';
+import { post, get } from '../API/API';
 
 class TableCompo extends Component {
   constructor(props) {
     super(props);
     this.state = {
       show: false,
-      showModal: false
+      showModal: false,
+      msg: '',
+      onDimmer: false,
+      productName: '',
+      product_amount: '',
+      price: '',
+      description: '',
+      cost: '',
+      product_img: '',
+      update_time: '',
+      create_time: '',
+      isLoading: false,
+      open: false
     };
-
-    //    this.close = this.close.bind(this);
-    this.btnHandler = this.btnHandler.bind(this);
+    this.updateHandler = this.updateHandler.bind(this);
+    this.submitHandler = this.submitHandler.bind(this);
+    this.close = this.close.bind(this);
   }
-  btnHandler() {
+  close() {
     this.setState({
+      open: false,
       showModal: false
+    });
+  }
+
+  updateHandler() {}
+  handleChange = e => {
+    const { name, value } = e.target;
+
+    this.setState({
+      [name]: value
+    });
+  };
+  handleDate = (event, { name, value }) => {
+    if (this.state.hasOwnProperty(name)) {
+      this.setState({ [name]: value });
+    }
+  };
+
+  async submitHandler() {
+    console.log(this.state);
+    const res = await post('/api/saveProduct', {
+      productName: this.state.productName,
+      product_amount: this.state.product_amount,
+      price: this.state.price,
+      description: this.state.description,
+      cost: this.state.cost,
+      create_time: this.state.create_time
+    });
+    if (res.code === 0) {
+      this.setState({
+        showModal: false,
+        open: true,
+        msg: res.msg
+      });
+      window.location.reload();
+    } else {
+      this.setState({
+        open: true,
+        msg: res.msg
+      });
+    }
+  }
+  async componentWillMount() {
+    const res = await get('/api/list');
+    if (res.code === 0) {
+      console.log(res.data);
+      this.setState({
+        isLoading: true,
+        data: res.data
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    this.setState({
+      isLoading: false
     });
   }
 
@@ -34,9 +103,8 @@ class TableCompo extends Component {
 
     return (
       <div className={this.props.box}>
-        <Modal
-          open={this.state.showModal}
-          trigger={
+        {this.state.isLoading ? (
+          <div>
             <Icon
               name="plus"
               style={{
@@ -45,140 +113,202 @@ class TableCompo extends Component {
                 left: '19.8em',
                 top: '8em'
               }}
-              onClick={() => this.setState({ showModal: true })}
+              onClick={() => this.setState({ showModal: true, onDimmer: true })}
             />
-          }
-          size="small"
-        >
-          <Modal.Content>
-            <Form>
-              {this.state.show ? (
-                <p
-                  style={{
-                    color: 'red',
-                    textAlign: 'center',
-                    fontSize: '16px'
-                  }}
-                >
-                  {this.state.msg}
-                </p>
-              ) : null}
-              <Form.Field
-                label="Email"
-                control="input"
-                name="email"
-                id="form-subcomponent-shorthand-input-first-name"
-                placeholder="liu@gmail.com"
-                onChange={this.handleChange}
-              />
+            <Modal
+              closeOnDimmerClick={this.state.onDimmer}
+              open={this.state.showModal}
+              size="small"
+              onClose={this.close}
+            >
+              <Modal.Content>
+                <Form>
+                  <Form.Group widths="equal">
+                    <Form.Field
+                      label="Product name"
+                      control="input"
+                      name="productName"
+                      id="form-subcomponent-shorthand-input-first-name"
+                      placeholder="product name"
+                      onChange={this.handleChange}
+                    />
 
-              <Form.Field
-                label="Password"
-                control="input"
-                name="password"
-                placeholder="Password"
-                onChange={this.handleChange}
-              />
+                    <Form.Field
+                      label="amount"
+                      control="input"
+                      name="product_amount"
+                      placeholder="amount"
+                      onChange={this.handleChange}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Field
+                      id="form-input-control-first-name"
+                      control={Input}
+                      name="price"
+                      label="Price"
+                      placeholder="price"
+                      onChange={this.handleChange}
+                    />
+                    <Form.Field
+                      id="form-input-control-first-name"
+                      control={Input}
+                      name="cost"
+                      label="Cost"
+                      placeholder="cost"
+                      onChange={this.handleChange}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <DateInput
+                      name="create_time"
+                      placeholder="create time"
+                      value={this.state.create_time}
+                      iconPosition="left"
+                      onChange={this.handleDate}
+                      popupPosition="right center"
+                    />
+                    {/* <DateInput
+                  name="update_time"
+                  placeholder="update time"
+                  value={this.state.update_time}
+                  iconPosition="right center"
+                  onChange={this.handleDate}
+                  popupPosition=" left"
+                /> */}
+                    <Form.Field>
+                      <Input type="file" name="product_img" />
+                    </Form.Field>
+                  </Form.Group>
+                  <Form.Field
+                    label="description"
+                    control="input"
+                    name="description"
+                    placeholder="Description"
+                    onChange={this.handleChange}
+                  />
+                  <Form.Field
+                    id="form-button-control-public"
+                    control={Button}
+                    content="Confirm"
+                    color="black"
+                    size={'large'}
+                    circular
+                    style={{ marginLeft: '12.5em', width: '17em' }}
+                    onClick={this.submitHandler}
+                  />
+                </Form>
+              </Modal.Content>
+            </Modal>
 
-              <Form.Field
-                label="RePassword"
-                control="input"
-                name="rePassword"
-                placeholder="RePassword"
-                onChange={this.handleChange}
-              />
-              <Form.Field
-                label="Username"
-                control="input"
-                name="userName"
-                placeholder="Username"
-                onChange={this.handleChange}
-              />
-              <Form.Field
-                label="Address"
-                control="input"
-                name="address"
-                placeholder="Address"
-                onChange={this.handleChange}
-              />
-              <Form.Group widths="equal">
-                <Form.Field
-                  id="form-input-control-first-name"
-                  control={Input}
-                  name="FirstName"
-                  label="First name"
-                  placeholder="First name"
-                  onChange={this.handleChange}
-                />
-                <Form.Field
-                  id="form-input-control-last-name"
-                  control={Input}
-                  name="lastName"
-                  label="Last name"
-                  placeholder="Last name"
-                  onChange={this.handleChange}
-                />
-              </Form.Group>
-              <Form.Field
-                id="form-button-control-public"
-                control={Button}
-                content="Confirm"
-                color="black"
-                size={'large'}
-                circular
-                style={{ marginLeft: '12.5em', width: '17em' }}
-                onClick={this.btnHandler}
-              />
-            </Form>
-          </Modal.Content>
-        </Modal>
+            <Table celled className={this.props.table}>
+              <Header>
+                <Row>
+                  <HeaderCell textAlign={'center'}>{this.props.ID}</HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Name}
+                  </HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Price}
+                  </HeaderCell>
 
-        <Table celled className={this.props.table}>
-          <Header>
-            <Row>
-              <HeaderCell textAlign={'center'}>{this.props.ID}</HeaderCell>
-              <HeaderCell textAlign={'center'}>{this.props.Name}</HeaderCell>
-              <HeaderCell textAlign={'center'}>{this.props.Price}</HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Cost}
+                  </HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Amount}
+                  </HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Image}
+                  </HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Description}
+                  </HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Create}
+                  </HeaderCell>
+                  <HeaderCell textAlign={'center'}>
+                    {this.props.Update}
+                  </HeaderCell>
+                  {this.props.IsAdmin ? (
+                    <HeaderCell textAlign={'center'} columns={3}>
+                      Option
+                    </HeaderCell>
+                  ) : null}
+                </Row>
+              </Header>
 
-              <HeaderCell textAlign={'center'}>{this.props.Cost}</HeaderCell>
+              <Body>
+                {this.state.data.map((p, i) => {
+                  return (
+                    <Row>
+                      <Cell textAlign={'center'} key={i + 1}>
+                        {p.productId}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 2}>
+                        {p.productName}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 4}>
+                        {p.price}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 5}>
+                        {p.cost}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 6}>
+                        {p.product_amount}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 7}>
+                        {p.product_img}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 8}>
+                        {p.description}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 8}>
+                        {p.create_time}
+                      </Cell>
+                      <Cell textAlign={'center'} key={i + 9}>
+                        {p.update_time}
+                      </Cell>
 
-              <HeaderCell textAlign={'center'}>{this.props.Image}</HeaderCell>
-              <HeaderCell textAlign={'center'}>
-                {this.props.Description}
-              </HeaderCell>
-              <HeaderCell textAlign={'center'}>{this.props.Create}</HeaderCell>
-              <HeaderCell textAlign={'center'}>
-                {this.props.Update} Time
-              </HeaderCell>
-              <HeaderCell textAlign={'center'} columns={3}>
-                Option
-              </HeaderCell>
-            </Row>
-          </Header>
-
-          <Body>
-            <Row>
-              <Cell textAlign={'center'}>First</Cell>
-              <Cell textAlign={'center'}>Cell</Cell>
-              <Cell textAlign={'center'}>Cell</Cell>
-              <Cell textAlign={'center'}>First</Cell>
-              <Cell textAlign={'center'}>Cell</Cell>
-              <Cell textAlign={'center'}>Cell</Cell>
-              <Cell textAlign={'center'}>First</Cell>
-              <Cell textAlign={'center'}>Cell</Cell>
-              <Cell textAlign={'center'}>
-                <span>
-                  <Button size="mini" circular color="blue">
-                    Delete
-                  </Button>
-                  <Button size="mini" circular color="orange">
-                    Update
-                  </Button>
-                </span>
-              </Cell>
-            </Row>
-          </Body>
-        </Table>
+                      {this.props.IsAdmin ? (
+                        <Cell textAlign={'center'} key={i + 10}>
+                          <span>
+                            <Button size="mini" circular color="blue">
+                              Delete
+                            </Button>
+                            <Button
+                              size="mini"
+                              circular
+                              color="orange"
+                              onClick={this.updateHandler}
+                            >
+                              Update
+                            </Button>
+                          </span>
+                        </Cell>
+                      ) : null}
+                    </Row>
+                  );
+                })}
+              </Body>
+            </Table>
+          </div>
+        ) : (
+          <Loader
+            as="div"
+            active
+            inline="centered"
+            content="Loading"
+            style={{ marginTop: '2em' }}
+          />
+        )}
+        <Confirm
+          open={this.state.open}
+          onCancel={() => this.setState({ open: false })}
+          onConfirm={this.close}
+          content={this.state.msg}
+          style={{ width: '20em' }}
+        />
       </div>
     );
   }

@@ -6,7 +6,9 @@ export default function NavCompo(props) {
     <nav className={NavStyle.nav}>
       <Image src={require('../img/lion.png')} avatar className={NavStyle.img} />
       <div className={NavStyle.title}>
-        <span className={NavStyle.span}>admin: username</span>
+        <span className={NavStyle.span}>
+          {props.type}: {props.userName}
+        </span>
         <Icon
           name="log out"
           color={'blue'}
