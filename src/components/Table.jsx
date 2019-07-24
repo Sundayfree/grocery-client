@@ -11,7 +11,7 @@ import {
   Confirm
 } from 'semantic-ui-react';
 import { DateInput } from 'semantic-ui-calendar-react';
-import { post, get } from '../API/API';
+import { post, get, Delete, put } from '../API/API';
 
 class TableCompo extends Component {
   constructor(props) {
@@ -30,11 +30,27 @@ class TableCompo extends Component {
       update_time: '',
       create_time: '',
       isLoading: false,
-      open: false
+      open: false,
+      productId: ''
     };
-    this.updateHandler = this.updateHandler.bind(this);
+    this.btnHandler = this.btnHandler.bind(this);
     this.submitHandler = this.submitHandler.bind(this);
     this.close = this.close.bind(this);
+    this.deleteHandler = this.deleteHandler.bind(this);
+  }
+  async deleteHandler(e) {
+    const res = await Delete('/api/deleteProduct/', e.target.name);
+    if (res.code === 0) {
+      this.setState({
+        open: true,
+        msg: res.msg
+      });
+    } else {
+      this.setState({
+        open: true,
+        msg: res.msg
+      });
+    }
   }
   close() {
     this.setState({
@@ -42,8 +58,24 @@ class TableCompo extends Component {
       showModal: false
     });
   }
+  async componentWillUpdate(nextP, nextS) {
+    console.log(nextP, nextS);
+    const res = await get('/api/list');
+    if (res.code === 0) {
+      this.setState({
+        isLoading: true,
+        data: res.data
+      });
+    }
+  }
 
-  updateHandler() {}
+  async btnHandler(e) {
+    this.setState({
+      showModal: true,
+      onDimmer: true,
+      productId: e.target.name
+    });
+  }
   handleChange = e => {
     const { name, value } = e.target;
 
@@ -58,33 +90,49 @@ class TableCompo extends Component {
   };
 
   async submitHandler() {
-    console.log(this.state);
-    const res = await post('/api/saveProduct', {
-      productName: this.state.productName,
-      product_amount: this.state.product_amount,
-      price: this.state.price,
-      description: this.state.description,
-      cost: this.state.cost,
-      create_time: this.state.create_time
-    });
-    if (res.code === 0) {
-      this.setState({
-        showModal: false,
-        open: true,
-        msg: res.msg
+    if (this.state.productId) {
+      const res = await put('/api/update/', this.state.productId, {
+        productId: this.state.productId,
+        productName: this.state.productName,
+        product_amount: this.state.product_amount,
+        price: this.state.price,
+        description: this.state.description,
+        cost: this.state.cost,
+        update_time: this.state.update_time
       });
-      window.location.reload();
+      if (res.code === 0) {
+        this.setState({
+          showModal: false,
+          open: true,
+          msg: res.msg
+        });
+      }
     } else {
-      this.setState({
-        open: true,
-        msg: res.msg
+      const res = await post('/api/saveProduct', {
+        productName: this.state.productName,
+        product_amount: this.state.product_amount,
+        price: this.state.price,
+        description: this.state.description,
+        cost: this.state.cost,
+        create_time: this.state.create_time
       });
+      if (res.code === 0) {
+        this.setState({
+          showModal: false,
+          open: true,
+          msg: res.msg
+        });
+      } else {
+        this.setState({
+          open: true,
+          msg: res.msg
+        });
+      }
     }
   }
   async componentWillMount() {
     const res = await get('/api/list');
     if (res.code === 0) {
-      console.log(res.data);
       this.setState({
         isLoading: true,
         data: res.data
@@ -160,22 +208,26 @@ class TableCompo extends Component {
                     />
                   </Form.Group>
                   <Form.Group widths="equal">
-                    <DateInput
-                      name="create_time"
-                      placeholder="create time"
-                      value={this.state.create_time}
-                      iconPosition="left"
-                      onChange={this.handleDate}
-                      popupPosition="right center"
-                    />
-                    {/* <DateInput
-                  name="update_time"
-                  placeholder="update time"
-                  value={this.state.update_time}
-                  iconPosition="right center"
-                  onChange={this.handleDate}
-                  popupPosition=" left"
-                /> */}
+                    {this.state.productId === '' ? (
+                      <DateInput
+                        name="create_time"
+                        placeholder="create time"
+                        value={this.state.create_time}
+                        iconPosition="left"
+                        onChange={this.handleDate}
+                        popupPosition="right center"
+                      />
+                    ) : (
+                      <DateInput
+                        name="update_time"
+                        placeholder="update time"
+                        value={this.state.update_time}
+                        iconPosition="right center"
+                        onChange={this.handleDate}
+                        popupPosition=" left"
+                      />
+                    )}
+
                     <Form.Field>
                       <Input type="file" name="product_img" />
                     </Form.Field>
@@ -273,14 +325,21 @@ class TableCompo extends Component {
                       {this.props.IsAdmin ? (
                         <Cell textAlign={'center'} key={i + 10}>
                           <span>
-                            <Button size="mini" circular color="blue">
+                            <Button
+                              size="mini"
+                              circular
+                              color="blue"
+                              name={p.productId}
+                              onClick={this.deleteHandler}
+                            >
                               Delete
                             </Button>
                             <Button
                               size="mini"
                               circular
                               color="orange"
-                              onClick={this.updateHandler}
+                              name={p.productId}
+                              onClick={this.btnHandler}
                             >
                               Update
                             </Button>

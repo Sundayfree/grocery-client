@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Loader } from 'semantic-ui-react';
+
 import HomeStyle from './Home.module.scss';
 import Footer from '../components/Footer';
 import MenuComp from '../components/MenuComp';
@@ -38,7 +38,6 @@ class HomePage extends Component {
   }
 
   componentWillUnmount() {
-    console.log('ddddddddddd unmount');
     this.setState({
       isLoading: false
     });
